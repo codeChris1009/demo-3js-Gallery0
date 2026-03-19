@@ -1,0 +1,46 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+
+# three.js build artifacts
+*.glb
+*.gltf
+*.bin
+*.fbx
+*.obj
+*.mtl
+*.blend
+*.dae
+*.3ds
+*.stl
+*.ply
+*.zip
+
+# Misc
+*.tmp
+*.swp
+*.swo
+
+# System files
+Thumbs.db
+Desktop.ini
