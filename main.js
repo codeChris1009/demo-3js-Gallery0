@@ -1,5 +1,12 @@
 import * as THREE from 'three';
+import {
+    getArtworkCount,
+    getBaseNodeRotation,
+    getRandomUniqueIndices
+} from './helper.js';
+import { getArtworkTextureByIndex } from './texture.js';
 
+// Renderer / Scene / Camera setup
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
@@ -8,30 +15,42 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const rootNode = new THREE.Object3D();
+scene.add(rootNode);
 
-camera.position.z = 5;
+// Build artworks in random order, then place them evenly around the circle.
+const artworkCount = getArtworkCount();
+const randomArtworkIndices = getRandomUniqueIndices(artworkCount);
 
-function animate(time) {
+randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
+    const artworkTextureResult = getArtworkTextureByIndex(artworkIndex);
+    if (!artworkTextureResult) return;
+    const { texture, ...artworkData } = artworkTextureResult;
 
-    cube.rotation.x = time / 2000;
-    cube.rotation.y = time / 1000;
+    const baseNode = new THREE.Object3D();
+    baseNode.rotation.y = getBaseNodeRotation(displayIndex, artworkCount);
+    rootNode.add(baseNode);
 
+    const artworkMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(3, 2, 0.1),
+        new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
+    );
+    artworkMesh.position.z = -4;
+    artworkMesh.userData = artworkData;
+    baseNode.add(artworkMesh);
+});
+
+
+function animate() {
+    rootNode.rotation.y += 0.002;
     renderer.render(scene, camera);
-
 }
 
-// Handle window resize Keep the aspect ratio and update the renderer size
-// This ensures that the scene looks correct when the window size changes
 // 處理視窗大小調整，保持寬高比並更新渲染器尺寸
 // 這確保視窗大小改變時場景看起來正確
+// Keep aspect ratio and renderer size in sync with viewport changes.
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-
