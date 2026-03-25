@@ -12,7 +12,7 @@ const ARTWORK_WIDTH = 3;
 const ARTWORK_HEIGHT = 2;
 const ARTWORK_DEPTH = 0.1;
 const ARTWORK_Z = -4;
-const ROTATION_SPEED = 0.002;
+const ARTWORK_ROTATION_SPEED = 0.002;
 
 // Renderer / Scene / Camera 初始化
 const renderer = new THREE.WebGLRenderer();
@@ -58,7 +58,7 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
 
 function animate() {
     // 持續旋轉，形成環繞展示效果
-    rootNode.rotation.y += ROTATION_SPEED;
+    rootNode.rotation.y += ARTWORK_ROTATION_SPEED;
     renderer.render(scene, camera);
 }
 

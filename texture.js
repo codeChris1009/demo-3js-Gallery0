@@ -26,7 +26,7 @@ const textureCache = new Map();
 
 
 /**
- * 依作品 ID 取得作品資料與貼圖。
+ * 依作品 ID 取得作品資料與貼圖
  * @param {number|string} id
  * @returns {ArtworkTextureResult|null}
  */
@@ -36,7 +36,7 @@ function getArtworkTextureById(id) {
 }
 
 /**
- * 依作品索引（0-based）取得作品資料與貼圖。
+ * 依作品索引（0-based）取得作品資料與貼圖
  * @param {number} index
  * @returns {ArtworkTextureResult|null}
  */
@@ -46,7 +46,7 @@ function getArtworkTextureByIndex(index) {
 }
 
 /**
- * 將作品資料組合成 `{ ...artwork, texture }` 回傳格式。
+ * 將作品資料組合成 `{ ...artwork, texture }` 回傳格式
  * @param {ArtworkData|null} artwork
  * @returns {ArtworkTextureResult|null}
  */
@@ -65,7 +65,7 @@ function buildArtworkTextureResult(artwork) {
 export { getArtworkTextureById, getArtworkTextureByIndex };
 
 /**
- * 依 ID 從快取 Map 取得作品。
+ * 依 ID 從快取 Map 取得作品
  * @param {number|string} id
  * @returns {ArtworkData|null}
  */
@@ -74,7 +74,7 @@ function getArtworkById(id) {
 }
 
 /**
- * 依索引從陣列取得作品。
+ * 依索引從陣列取得作品
  * @param {number} index
  * @returns {ArtworkData|null}
  */
@@ -85,7 +85,7 @@ function getArtworkByIndex(index) {
 }
 
 /**
- * 依圖片檔名取得貼圖，並使用快取避免重複載入。
+ * 依圖片檔名取得貼圖，並使用快取避免重複載入
  * @param {string} imageName
  * @returns {THREE.Texture|null}
  */
@@ -95,6 +95,7 @@ function getTextureByImageName(imageName) {
     const cachedTexture = textureCache.get(imageName);
     if (cachedTexture) return cachedTexture;
 
+    // Vite， public/ 目錄會被當成網站根目錄來提供靜態檔案
     const texturePath = `/${imageName}`;
     const texture = textureLoader.load(texturePath);
     texture.colorSpace = THREE.SRGBColorSpace;
