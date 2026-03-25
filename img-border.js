@@ -1,12 +1,32 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
+// Border dimensions (slightly larger than artwork plane: 3 x 2)
+const BORDER_WIDTH = 3.09;
+const BORDER_HEIGHT = 2.09;
+const BORDER_DEPTH = 0.09;
+const BORDER_SEGMENTS = 6;
+const BORDER_RADIUS = 0.03;
+const BORDER_COLOR = 0xd5d5d5;
+
+/**
+ * Create a simple rounded silver-gray frame mesh.
+ * The mesh uses `BackSide` so only the frame edge is visible around the artwork.
+ * @returns {THREE.Mesh}
+ */
 function createImageBorderMesh() {
-    // Slightly larger than the image plane to create a border effect
-    const geometry = new RoundedBoxGeometry(3.09, 2.09, 0.09, 6, 0.03);
+    // Rounded frame geometry
+    const geometry = new RoundedBoxGeometry(
+        BORDER_WIDTH,
+        BORDER_HEIGHT,
+        BORDER_DEPTH,
+        BORDER_SEGMENTS,
+        BORDER_RADIUS
+    );
+
+    // Basic silver-gray material for frame look
     const material = new THREE.MeshBasicMaterial({
-        // Simple silver-gray border color
-        color: 0xd5d5d5,
+        color: BORDER_COLOR,
         // Render back side to show border around artwork edges
         side: THREE.BackSide,
     });

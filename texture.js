@@ -1,18 +1,18 @@
 /**
  * @typedef {Object} ArtworkData
- * @property {number} id            - 作品ID
- * @property {string} image         - 作品檔名(不含.jpg/png等副檔名)
- * @property {string} title         - 作品標題
- * @property {string} artist        - 作品作者
- * @property {number} StartYear     - 作品創作開始年份
- * @property {number} EndYear       - 作品創作結束年份
- * @property {string} description   - 作品描述
- * @property {string} url           - 作品網頁連結
+ * @property {number} id - 作品 ID
+ * @property {string} image - 作品圖片檔名（含副檔名）
+ * @property {string} title - 作品標題
+ * @property {string} artist - 作品作者
+ * @property {number} StartYear - 創作開始年份
+ * @property {number} EndYear - 創作結束年份
+ * @property {string} description - 作品描述
+ * @property {string} url - 作品頁面連結
  */
 
 /**
  * @typedef {ArtworkData & { texture: THREE.Texture }} ArtworkTextureResult
- * @property {THREE.Texture} texture
+ * @property {THREE.Texture} texture - Three.js 貼圖物件
  */
 
 import * as THREE from 'three';
@@ -26,7 +26,7 @@ const textureCache = new Map();
 
 
 /**
- * Get artwork data and texture by artwork id.
+ * 依作品 ID 取得作品資料與貼圖。
  * @param {number|string} id
  * @returns {ArtworkTextureResult|null}
  */
@@ -36,7 +36,7 @@ function getArtworkTextureById(id) {
 }
 
 /**
- * Get artwork data and texture by array index.
+ * 依作品索引（0-based）取得作品資料與貼圖。
  * @param {number} index
  * @returns {ArtworkTextureResult|null}
  */
@@ -46,7 +46,7 @@ function getArtworkTextureByIndex(index) {
 }
 
 /**
- * Build output payload `{...artwork, texture}`.
+ * 將作品資料組合成 `{ ...artwork, texture }` 回傳格式。
  * @param {ArtworkData|null} artwork
  * @returns {ArtworkTextureResult|null}
  */
@@ -54,10 +54,7 @@ function buildArtworkTextureResult(artwork) {
     if (!artwork) return null;
 
     const texture = getTextureByImageName(artwork.image);
-    if (!texture) {
-        console.warn(`Failed to load texture for artwork id=${artwork.id}, image=${artwork.image}`);
-        return null;
-    }
+    if (!texture) return null;
 
     return {
         ...artwork,
@@ -65,13 +62,10 @@ function buildArtworkTextureResult(artwork) {
     };
 }
 
-
-
 export { getArtworkTextureById, getArtworkTextureByIndex };
 
-// Private helper functions =======================================================
-
 /**
+ * 依 ID 從快取 Map 取得作品。
  * @param {number|string} id
  * @returns {ArtworkData|null}
  */
@@ -80,6 +74,7 @@ function getArtworkById(id) {
 }
 
 /**
+ * 依索引從陣列取得作品。
  * @param {number} index
  * @returns {ArtworkData|null}
  */
@@ -90,6 +85,7 @@ function getArtworkByIndex(index) {
 }
 
 /**
+ * 依圖片檔名取得貼圖，並使用快取避免重複載入。
  * @param {string} imageName
  * @returns {THREE.Texture|null}
  */

@@ -1,28 +1,33 @@
 import { artworks } from './const.js';
 
+const TWO_PI = Math.PI * 2;
 
 /**
  * Get total number of artworks.
+ * 取得作品總數。
  * @returns {number}
  */
 function getArtworkCount() {
     return artworks.length;
 }
 
-
 /**
- * Compute base node rotation so artworks are evenly distributed in a circle.
- * @param {number} index
- * @param {number} count
+ * Calculate the base node rotation angle for placing artworks evenly around a circle.
+ * 計算作品在圓周上的旋轉角度。
+ * @param {number} index - 目前第幾個位置（從 0 開始）。
+ * @param {number} count - 總作品數量。
  * @returns {number}
  */
 function getBaseNodeRotation(index, count) {
-    if (count <= 0) return 0;
-    return index * (2 * Math.PI / count);
+    const safeIndex = Number.isFinite(index) ? index : 0;
+    const safeCount = Math.max(1, Math.floor(count));
+    return safeIndex * (TWO_PI / safeCount);
 }
 
 /**
- * Build a shuffled non-repeating index array in range [0, count - 1].
+ * Get an array of unique random indices from 0 to count-1.
+ * 產生 0 ~ count-1 的隨機且不重複索引陣列。
+ * 使用 Fisher-Yates 洗牌法，時間複雜度 O(n)。
  * @param {number} count
  * @returns {number[]}
  */
@@ -30,7 +35,6 @@ function getRandomUniqueIndices(count) {
     const safeCount = Math.max(0, Math.floor(count));
     const indices = Array.from({ length: safeCount }, (_, i) => i);
 
-    // Fisher-Yates shuffle
     for (let i = indices.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [indices[i], indices[j]] = [indices[j], indices[i]];
