@@ -5,6 +5,7 @@ import {
     getRandomUniqueIndices
 } from './helper.js';
 import { getArtworkTextureByIndex } from './texture.js';
+import { createImageBorderMesh } from './img-border.js';
 
 // Renderer / Scene / Camera setup
 const renderer = new THREE.WebGLRenderer();
@@ -30,6 +31,12 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
     const baseNode = new THREE.Object3D();
     baseNode.rotation.y = getBaseNodeRotation(displayIndex, artworkCount);
     rootNode.add(baseNode);
+
+    const border = createImageBorderMesh();
+    // Slightly behind the artwork mesh to create a border effect
+    border.position.z = -4;
+    baseNode.add(border);
+
 
     const artworkMesh = new THREE.Mesh(
         new THREE.BoxGeometry(3, 2, 0.1),
