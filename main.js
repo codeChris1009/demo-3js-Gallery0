@@ -7,6 +7,7 @@ import {
 import { getArtworkTextureByIndex } from './texture.js';
 import { createImageBorderMesh } from './img-border.js';
 import { createSpotlight } from './spotlight.js';
+import { createMirror } from './reflector-mirror.js';
 
 
 // 畫作平面尺寸與位置設定
@@ -65,6 +66,11 @@ spotlight.target.position.set(0, 1.5, -5);
 scene.add(spotlight);
 scene.add(spotlight.target);
 
+const mirror = createMirror();
+mirror.position.y = -1.1;
+mirror.rotateX(-Math.PI / 2);
+scene.add(mirror);
+
 
 function animate() {
     // 持續旋轉，形成環繞展示效果
@@ -80,4 +86,6 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+    mirror.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
 });

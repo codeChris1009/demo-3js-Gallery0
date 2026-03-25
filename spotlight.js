@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 // 聚光燈預設參數 / Spotlight default params
 const SPOTLIGHT_MAIN_COLOR = 0xffffff;
-const SPOTLIGHT_INTENSITY = 120.0;
+const SPOTLIGHT_INTENSITY = 110.0;
 const SPOTLIGHT_DISTANCE = 10.0;
 const SPOTLIGHT_ANGLE = 0.68;
 const SPOTLIGHT_PENUMBRA = 1;
