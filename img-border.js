@@ -7,7 +7,7 @@ const BORDER_HEIGHT = 2.09;
 const BORDER_DEPTH = 0.09;
 const BORDER_SEGMENTS = 6;
 const BORDER_RADIUS = 0.03;
-const BORDER_COLOR = 0xd5d5d5;
+const BORDER_COLOR = 0x8a8a8a;
 
 /**
  * Create a simple rounded silver-gray frame mesh.
@@ -25,7 +25,7 @@ function createImageBorderMesh() {
     );
 
     // Basic silver-gray material for frame look
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshStandardMaterial({
         color: BORDER_COLOR,
         // Render back side to show border around artwork edges
         side: THREE.BackSide,

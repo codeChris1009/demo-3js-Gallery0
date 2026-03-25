@@ -6,6 +6,8 @@ import {
 } from './helper.js';
 import { getArtworkTextureByIndex } from './texture.js';
 import { createImageBorderMesh } from './img-border.js';
+import { createSpotlight } from './spotlight.js';
+
 
 // 畫作平面尺寸與位置設定
 const ARTWORK_WIDTH = 3;
@@ -49,12 +51,20 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
 
     const artworkMesh = new THREE.Mesh(
         new THREE.BoxGeometry(ARTWORK_WIDTH, ARTWORK_HEIGHT, ARTWORK_DEPTH),
-        new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
+        new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide })
     );
     artworkMesh.position.z = ARTWORK_Z;
     artworkMesh.userData = artworkData;
     baseNode.add(artworkMesh);
 });
+
+
+const spotlight = createSpotlight();
+spotlight.position.set(0, 5, 0);
+spotlight.target.position.set(0, 1.5, -5);
+scene.add(spotlight);
+scene.add(spotlight.target);
+
 
 function animate() {
     // 持續旋轉，形成環繞展示效果
