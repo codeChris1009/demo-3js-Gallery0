@@ -8,6 +8,7 @@ import { getArtworkTextureByIndex } from './texture.js';
 import { createImageBorderMesh } from './img-border.js';
 import { createSpotlight } from './spotlight.js';
 import { createMirror } from './reflector-mirror.js';
+import { createArrowButton } from './arrow-btn.js';
 
 
 // 畫作平面尺寸與位置設定
@@ -15,7 +16,6 @@ const ARTWORK_WIDTH = 3;
 const ARTWORK_HEIGHT = 2;
 const ARTWORK_DEPTH = 0.1;
 const ARTWORK_Z = -4;
-const ARTWORK_ROTATION_SPEED = 0.002;
 
 // Renderer / Scene / Camera 初始化
 const renderer = new THREE.WebGLRenderer();
@@ -57,6 +57,13 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
     artworkMesh.position.z = ARTWORK_Z;
     artworkMesh.userData = artworkData;
     baseNode.add(artworkMesh);
+
+    // ARROW BUTTONS
+    const { left: leftArrow, right: rightArrow } = createArrowButton();
+    leftArrow.position.set(ARTWORK_WIDTH, 0, ARTWORK_Z);
+    rightArrow.position.set(-ARTWORK_WIDTH, 0, ARTWORK_Z);
+    baseNode.add(leftArrow);
+    baseNode.add(rightArrow);
 });
 
 
@@ -73,8 +80,6 @@ scene.add(mirror);
 
 
 function animate() {
-    // 持續旋轉，形成環繞展示效果
-    rootNode.rotation.y += ARTWORK_ROTATION_SPEED;
     renderer.render(scene, camera);
 }
 
