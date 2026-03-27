@@ -26,7 +26,7 @@ let readySparkIntervalId = null;
 let countdownSparkIntervalId = null;
 
 function initIntroCurtainCarousel() {
-    return () => {};
+    return () => { };
 }
 
 function createParticle({
@@ -353,7 +353,7 @@ function initIntroSequence() {
     document.body.classList.add('intro-active');
 
     return new Promise((resolve) => {
-        const countdownValues = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        const countdownValues = ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
         let currentIndex = 0;
         let isReadyToEnter = false;
         const stopCurtainCarousel = initIntroCurtainCarousel();
@@ -381,8 +381,8 @@ function initIntroSequence() {
                         prompt.hidden = false;
                         overlay.classList.add('is-ready');
                         isReadyToEnter = true;
-                    }, 420);
-                }, 1400);
+                    }, 1500);
+                }, 1300);
                 return;
             }
 

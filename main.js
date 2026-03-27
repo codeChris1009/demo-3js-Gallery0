@@ -21,7 +21,6 @@ import {
 } from './click-fn.js';
 import { initCustomCursor } from './cursor.js';
 
-
 // 畫作平面尺寸與位置設定
 // Artwork dimensions and position settings
 const ARTWORK_WIDTH = 3;
@@ -146,6 +145,23 @@ function animate(time) {
     renderer.render(scene, camera);
 
 }
+
+/**
+ * 預先渲染各個作品角度，讓貼圖在首次互動前先上傳到 GPU。
+ * Pre-render each artwork view so textures are uploaded before first interaction.
+ */
+function prewarmArtworkViews() {
+    const initialRotationY = rootNode.rotation.y;
+    const step = COMPLETE_CIRCLE_RADIANS / Math.max(1, artworkCount);
+
+    for (let i = 0; i < artworkCount; i++) {
+        rootNode.rotation.y = initialRotationY + step * i;
+        renderer.render(scene, camera);
+    }
+
+    rootNode.rotation.y = initialRotationY;
+}
+
 
 // Handle window resize Keep the aspect ratio and update the renderer size
 // This ensures that the scene looks correct when the window size changes
