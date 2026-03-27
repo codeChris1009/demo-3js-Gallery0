@@ -22,12 +22,14 @@ import {
 
 
 // 畫作平面尺寸與位置設定
+// Artwork dimensions and position settings
 const ARTWORK_WIDTH = 3;
 const ARTWORK_HEIGHT = 2;
 const ARTWORK_DEPTH = 0.1;
 const ARTWORK_Z = -4;
 
 // Renderer / Scene / Camera 初始化
+// Initialize Renderer / Scene / Camera
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -39,9 +41,12 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const rootNode = new THREE.Object3D();
 scene.add(rootNode);
 
+// 追蹤當前面向相機的作品 displayIndex
+// Track the current front-facing artwork displayIndex
+let currentFrontDisplayIndex = 0;
 
-// Build artworks: shuffle order, then distribute evenly around the circle
 // 建立作品：先打散順序，再平均分布在圓周上
+// Build artworks: shuffle order, then distribute evenly around the circle
 const artworkCount = getArtworkCount();
 const randomArtworkIndices = getRandomUniqueIndices(artworkCount);
 
@@ -52,11 +57,14 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
 
     const baseNode = new THREE.Object3D();
     baseNode.rotation.y = getBaseNodeRotation(displayIndex, artworkCount);
+    // 將作品完整資料存入 baseNode，用於後續查找
+    // Store complete artwork data in baseNode for later retrieval.
+    baseNode.userData = { displayIndex, ...artworkData };
     rootNode.add(baseNode);
 
     const border = createImageBorderMesh();
+    // 邊框與畫作放在同一 Z 位置，確保邊框正確包圍畫作
     // Position border and artwork at the same Z to ensure the border frames the artwork correctly
-    // 邊框與畫作放在同一層位置
     border.position.z = ARTWORK_Z;
     baseNode.add(border);
 
@@ -68,8 +76,13 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
     artworkMesh.userData = artworkData;
     baseNode.add(artworkMesh);
 
-    // ARROW BUTTONS
+    // 建立左右箭頭按鈕
+    // Create left and right arrow buttons
     const { left: leftArrow, right: rightArrow } = createArrowButton();
+    leftArrow.userData = displayIndex;
+    rightArrow.userData = displayIndex;
+    // 注意：leftArrow 在畫面右邊（x = +3），rightArrow 在畫面左邊（x = -3）
+    // Note: leftArrow is on the right side of screen (x = +3), rightArrow is on the left side (x = -3)
     leftArrow.position.set(ARTWORK_WIDTH, 0, ARTWORK_Z);
     rightArrow.position.set(-ARTWORK_WIDTH, 0, ARTWORK_Z);
     baseNode.add(leftArrow);
@@ -93,6 +106,19 @@ scene.add(mirror);
 renderer.compile(scene, camera);
 prewarmArtworkViews();
 renderer.render(scene, camera);
+
+// 初始化時顯示正面作品的標題與藝術家
+// Display the front-facing artwork's title and artist on initialization
+updateArtworkInfoFromRotation();
+// 延遲一點淡入，讓頁面載入更流暢
+// Delay fade-in slightly for smoother page load.
+setTimeout(() => {
+    const titleElement = document.getElementById('title');
+    const artistElement = document.getElementById('artist');
+    if (titleElement) titleElement.style.opacity = '1';
+    if (artistElement) artistElement.style.opacity = '1';
+}, 100);
+
 renderer.setAnimationLoop(animate);
 
 
@@ -117,10 +143,8 @@ function prewarmArtworkViews() {
     rootNode.rotation.y = initialRotationY;
 }
 
-// 處理視窗大小調整，保持寬高比並更新渲染器尺寸
-// 這確保視窗大小改變時場景看起來正確
-// 視窗大小改變時，更新相機與渲染器尺寸
-// Keep aspect ratio and renderer size in sync with viewport changes.
+// 視窗大小調整：更新相機寬高比與渲染器尺寸
+// Window resize: update camera aspect ratio and renderer size
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -138,5 +162,40 @@ window.addEventListener('click', (event) => {
         artworkCount,
         COMPLETE_CIRCLE_RADIANS,
         ARROW_LEFT_NAME,
-        ARROW_RIGHT_NAME);
+        ARROW_RIGHT_NAME,
+        updateArtworkInfoFromRotation);
 });
+
+/**
+ * 從當前旋轉角度找到正面作品並更新資訊
+ * Find the front-facing artwork from current rotation and update display info
+ */
+function updateArtworkInfoFromRotation() {
+    // 找到面向相機的 baseNode（總旋轉角度絕對值最小，考慮 2π 週期性）
+    // Find the baseNode facing the camera (smallest absolute total rotation, considering 2π periodicity)
+    let frontFacingNode = null;
+    let minRotationDiff = Infinity;
+
+    rootNode.children.forEach((child) => {
+        const totalRotation = rootNode.rotation.y + child.rotation.y;
+        const normalizedRotation = ((totalRotation % COMPLETE_CIRCLE_RADIANS) + COMPLETE_CIRCLE_RADIANS) % COMPLETE_CIRCLE_RADIANS;
+        const adjustedRotation = normalizedRotation > Math.PI ? normalizedRotation - COMPLETE_CIRCLE_RADIANS : normalizedRotation;
+        const rotationDiff = Math.abs(adjustedRotation);
+
+        if (rotationDiff < minRotationDiff) {
+            minRotationDiff = rotationDiff;
+            frontFacingNode = child;
+        }
+    });
+
+    if (frontFacingNode && frontFacingNode.userData) {
+        const { displayIndex, id, title, artist } = frontFacingNode.userData;
+        currentFrontDisplayIndex = displayIndex;
+
+        const titleElement = document.getElementById('title');
+        const artistElement = document.getElementById('artist');
+
+        if (titleElement) titleElement.textContent = title || '';
+        if (artistElement) artistElement.textContent = artist || '';
+    }
+}
