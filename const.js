@@ -25,7 +25,7 @@ const artworks = [
     {
         id: 2,
         image: 'Seascape-from-the-Zeeland-Waters-near-the-Island-of-Schouwen.png',
-        title: 'Seascape from the Zeeland Waters near the Island of Schouwen',
+        title: 'Seascape Zeeland Waters Island Schouwen',
         artist: 'Petrus Johannes Schotel',
         StartYear: 1825,
         EndYear: 1827,

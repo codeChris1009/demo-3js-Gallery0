@@ -3,8 +3,8 @@ import { artworks } from './const.js';
 const COMPLETE_CIRCLE_RADIANS = Math.PI * 2;
 
 /**
- * Get total number of artworks.
  * 取得作品總數
+ * Get total number of artworks
  * @returns {number}
  */
 function getArtworkCount() {
@@ -12,10 +12,10 @@ function getArtworkCount() {
 }
 
 /**
- * Calculate the base node rotation angle for placing artworks evenly around a circle.
- * 計算作品在圓周上的旋轉角度
- * @param {number} index - 目前第幾個位置（從 0 開始）
- * @param {number} count - 總作品數量
+ * 計算作品在圓周上的旋轉角度，使其平均分布
+ * Calculate the base node rotation angle for placing artworks evenly around a circle
+ * @param {number} index - 目前第幾個位置（從 0 開始）/ Current position (0-based)
+ * @param {number} count - 總作品數量 / Total artwork count
  * @returns {number}
  */
 function getBaseNodeRotation(index, count) {
@@ -25,10 +25,9 @@ function getBaseNodeRotation(index, count) {
 }
 
 /**
- * Get an array of unique random indices from 0 to count-1.
- * 產生 0 ~ count-1 的隨機且不重複索引陣列
- * 使用 Fisher-Yates 洗牌法，時間複雜度 O(n)
- * @param {number} count
+ * 產生 0 ~ count-1 的隨機且不重複索引陣列（使用 Fisher-Yates 洗牌法）
+ * Get an array of unique random indices from 0 to count-1 using Fisher-Yates shuffle
+ * @param {number} count - 陣列長度 / Array length
  * @returns {number[]}
  */
 function getRandomUniqueIndices(count) {

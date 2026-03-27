@@ -1,14 +1,16 @@
 import * as THREE from 'three';
 
 // 箭頭按鈕幾何尺寸（目前使用 BoxGeometry）
-// Arrow button geometry dimensions (currently using BoxGeometry).
+// Arrow button geometry dimensions (currently using BoxGeometry)
 const ARROW_WIDTH = 0.3;
 const ARROW_HEIGHT = 0.3;
-// 輕微厚度以確保在 z=0 平面上可見 / Slight thickness to ensure visibility on z=0 plane.
+
+// 輕微厚度以確保可見性
+// Slight thickness to ensure visibility
 const ARROW_DEPTH = 0.01;
 
-// Mesh Name 定義，方便後續識別
-// Mesh name definitions for easier identification later.
+// Mesh 名稱定義，方便後續識別
+// Mesh name definitions for easier identification
 const ARROW_LEFT_NAME = 'arrow-left';
 const ARROW_RIGHT_NAME = 'arrow-right';
 
@@ -22,7 +24,7 @@ const ARROW_LEFT = textureLoader.load('/left.png');
 const ARROW_RIGHT = textureLoader.load('/right.png');
 
 // 共用按鈕幾何，減少重複建立成本
-// Reuse one geometry to reduce allocation cost.
+// Reuse one geometry to reduce allocation cost
 const ARROW_BUTTON_BOXGEOMETRY = new THREE.BoxGeometry(
     ARROW_WIDTH,
     ARROW_HEIGHT,
@@ -30,13 +32,13 @@ const ARROW_BUTTON_BOXGEOMETRY = new THREE.BoxGeometry(
 );
 
 // 設定色彩空間，避免貼圖顏色偏暗
-// Use sRGB color space to avoid darker-looking textures.
+// Use sRGB color space to avoid darker-looking textures
 ARROW_LEFT.colorSpace = THREE.SRGBColorSpace;
 ARROW_RIGHT.colorSpace = THREE.SRGBColorSpace;
 
 /**
- * 建立左右箭頭按鈕。
- * Create left/right arrow button meshes.
+ * 建立左右箭頭按鈕
+ * Create left/right arrow button meshes
  *
  * @returns {{ left: THREE.Mesh, right: THREE.Mesh }}
  */
@@ -48,8 +50,8 @@ function createArrowButton() {
 }
 
 /**
- * 建立單一箭頭按鈕 mesh。
- * Create one arrow button mesh.
+ * 建立單一箭頭按鈕 mesh
+ * Create one arrow button mesh
  *
  * @param {THREE.Texture} textureMap - 按鈕貼圖 / Button texture map
  * @param {string} name - 物件名稱 / Mesh name
@@ -58,7 +60,8 @@ function createArrowButton() {
 function createArrowMesh(textureMap, name) {
     const material = new THREE.MeshStandardMaterial({
         map: textureMap,
-        // 允許貼圖透明度生效 / Enable texture transparency
+        // 允許貼圖透明度生效
+        // Enable texture transparency
         transparent: true,
     });
     const mesh = new THREE.Mesh(ARROW_BUTTON_BOXGEOMETRY, material);

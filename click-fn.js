@@ -38,14 +38,15 @@ function createClickIntersections(event, camera, rootNode) {
 }
 
 /**
- * 判斷第一個命中物件並執行點擊後行為
- * Check the first hit object and execute click behavior (currently logs).
+ * 判斷點擊的物件並執行相應的旋轉行為
+ * Check clicked object and execute corresponding rotation behavior
  *
  * @param {THREE.Intersection[]} intersections
  * @param {number} artworkCount - 作品總數 / Total artwork count
  * @param {number} completeCircleRadians - 一整圈弧度 / Full-circle radians
  * @param {string} leftArrowName - 左箭頭物件名稱 / Left arrow mesh name
  * @param {string} rightArrowName - 右箭頭物件名稱 / Right arrow mesh name
+ * @param {Function} [onRotationComplete] - 旋轉完成後的回調函數 / Callback after rotation completes
  * @returns {void}
  */
 function runClickArrowAction(
@@ -53,7 +54,8 @@ function runClickArrowAction(
     artworkCount,
     completeCircleRadians,
     leftArrowName,
-    rightArrowName) {
+    rightArrowName,
+    onRotationComplete) {
     if (intersections.length === 0) {
         if (ENABLE_CLICK_DEBUG_LOG) console.log('Intersections: []');
         return;
@@ -75,38 +77,44 @@ function runClickArrowAction(
         if (ENABLE_CLICK_DEBUG_LOG) console.log(`${leftArrowName} clicked`);
         rotateGallery(galleryRootNode,
             TO_LEFT,
-            artworkCount, completeCircleRadians);
+            artworkCount, completeCircleRadians, onRotationComplete);
     } else if (clickedObject.name === rightArrowName) {
         if (ENABLE_CLICK_DEBUG_LOG) console.log(`${rightArrowName} clicked`);
         rotateGallery(galleryRootNode,
             TO_RIGHT,
-            artworkCount, completeCircleRadians);
+            artworkCount, completeCircleRadians, onRotationComplete);
     }
 }
 
-// Private helper function
+// === Private Helper Functions ===
 
 /**
- * 執行畫廊旋轉動畫。
- * Execute gallery rotation animation.
+ * 執行畫廊旋轉動畫
+ * Execute gallery rotation animation
  *
  * @param {THREE.Object3D} rootNode - 旋轉的根節點 / The root node to rotate
  * @param {number} direction - 旋轉方向，左正右負 / Rotation direction, left positive, right negative
  * @param {number} artworkCount - 作品總數 / Total artwork count
  * @param {number} completeCircleRadians - 一整圈弧度 / Full-circle radians
+ * @param {Function} [onRotationComplete] - 旋轉完成後的回調函數 / Callback after rotation completes
  * @returns {void}
  */
 function rotateGallery(
     rootNode,
     direction,
     artworkCount,
-    completeCircleRadians) {
+    completeCircleRadians,
+    onRotationComplete) {
 
     if (!rootNode || artworkCount <= 0) return;
     const deltaY = direction * (completeCircleRadians / artworkCount);
     const tweenState = { y: rootNode.rotation.y };
     const previousRotationTween = activeRotationTweenByRoot.get(rootNode);
     if (previousRotationTween) previousRotationTween.stop();
+
+    // 淡出當前的標題與藝術家
+    // Fade out current title and artist.
+    fadeOutArtworkInfo();
 
     // 使用 Tween.js 進行平滑旋轉動畫
     const rotationTween = new Tween(tweenState, tweenGroup)
@@ -119,24 +127,49 @@ function rotateGallery(
         })
         .onComplete(() => {
             activeRotationTweenByRoot.delete(rootNode);
+            // 旋轉完成後，更新並淡入新的標題與藝術家
+            // After rotation, update and fade in new title and artist.
+            if (onRotationComplete) onRotationComplete();
+            fadeInArtworkInfo();
         })
         .onStop(() => {
             activeRotationTweenByRoot.delete(rootNode);
         })
         .start();
     activeRotationTweenByRoot.set(rootNode, rotationTween);
-    // rootNode.rotateY(direction * (completeCircleRadians / artworkCount));
 }
 
 /**
- * 更新所有啟用中的 tween 動畫。
- * Update all active tween animations.
+ * 更新所有啟用中的 tween 動畫
+ * Update all active tween animations
  *
- * @param {number} [time]
+ * @param {number} [time] - 當前時間戳 / Current timestamp
  * @returns {void}
  */
 function updateTween(time) {
     tweenGroup.update(time);
+}
+
+/**
+ * 淡出標題與藝術家元素
+ * Fade out title and artist elements.
+ */
+function fadeOutArtworkInfo() {
+    const titleElement = document.getElementById('title');
+    const artistElement = document.getElementById('artist');
+    if (titleElement) titleElement.style.opacity = '0';
+    if (artistElement) artistElement.style.opacity = '0';
+}
+
+/**
+ * 淡入標題與藝術家元素
+ * Fade in title and artist elements.
+ */
+function fadeInArtworkInfo() {
+    const titleElement = document.getElementById('title');
+    const artistElement = document.getElementById('artist');
+    if (titleElement) titleElement.style.opacity = '1';
+    if (artistElement) artistElement.style.opacity = '1';
 }
 
 
