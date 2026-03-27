@@ -1,8 +1,8 @@
 # Three.js 3D 虛擬藝廊實作：核心技術與開發紀實
 
 ### 展示網誌 Github Page
-GALERY [https://codechris1009.github.io/demo-3js-Gallery0/]
-
+[GALERY](https://codechris1009.github.io/demo-3js-Gallery0/)
+<br/>
 ## 程式架構與檔案說明
 
 本專案主要檔案功能如下：
@@ -49,7 +49,7 @@ GALERY [https://codechris1009.github.io/demo-3js-Gallery0/]
 
 **參考來源：**
 <br/>
-Dan Greenheck 教學影片 [https://youtu.be/HxPgbXlq1mo?si=dWG4kTX1_LRl_7T4]
+[Dan Greenheck 教學影片](https://youtu.be/HxPgbXlq1mo?si=dWG4kTX1_LRl_7T4)
 
 本紀錄涵蓋了從零建構具備互動性、平滑動畫與光影特效的 3D 虛擬藝廊（可作為個人作品集展示）的完整技術細節與實作心得。
 
