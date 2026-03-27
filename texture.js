@@ -96,7 +96,8 @@ function getTextureByImageName(imageName) {
     if (cachedTexture) return cachedTexture;
 
     // Vite， public/ 目錄會被當成網站根目錄來提供靜態檔案
-    const texturePath = `/${imageName}`;
+    const base = import.meta.env.BASE_URL;
+    const texturePath = base + imageName;
     const texture = textureLoader.load(texturePath);
     texture.colorSpace = THREE.SRGBColorSpace;
 
