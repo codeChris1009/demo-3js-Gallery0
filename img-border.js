@@ -7,7 +7,7 @@ const BORDER_HEIGHT = 2.09;
 const BORDER_DEPTH = 0.09;
 const BORDER_SEGMENTS = 6;
 const BORDER_RADIUS = 0.03;
-const BORDER_COLOR = 0x8a8a8a;
+const BORDER_COLOR = 0xaaaaaa;
 
 /**
  * Create a simple rounded silver-gray frame mesh.

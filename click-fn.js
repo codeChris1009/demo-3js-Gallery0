@@ -71,7 +71,9 @@ function runClickArrowAction(
     if (!arrowIntersection || !arrowIntersection.object) return;
 
     const clickedObject = arrowIntersection.object;
-    const galleryRootNode = clickedObject.parent?.parent || null;
+    // 從箭頭的 userData 中獲取 galleryRootNode 引用
+    // Get galleryRootNode reference from arrow's userData
+    const galleryRootNode = clickedObject.userData?.galleryRootNode || null;
 
     if (clickedObject.name === leftArrowName) {
         if (ENABLE_CLICK_DEBUG_LOG) console.log(`${leftArrowName} clicked`);

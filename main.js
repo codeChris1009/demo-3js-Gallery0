@@ -8,7 +8,7 @@ import {
 import { getArtworkTextureByIndex } from './texture.js';
 import { createImageBorderMesh } from './img-border.js';
 import { createSpotlight } from './spotlight.js';
-import { createMirror } from './reflector-mirror.js';
+import { createMirror, getMirrorRenderTargetSize } from './reflector-mirror.js';
 import {
     createArrowButton,
     ARROW_LEFT_NAME,
@@ -19,6 +19,7 @@ import {
     runClickArrowAction,
     updateTween
 } from './click-fn.js';
+import { initCustomCursor } from './cursor.js';
 
 
 // 畫作平面尺寸與位置設定
@@ -27,6 +28,9 @@ const ARTWORK_WIDTH = 3;
 const ARTWORK_HEIGHT = 2;
 const ARTWORK_DEPTH = 0.1;
 const ARTWORK_Z = -4;
+const ARTWORK_FOCUS_Z_OFFSET = 0.55;
+const ARTWORK_SIDE_SCALE = 0.6;
+const ARTWORK_FOCUS_SCALE = 1.12;
 
 // Renderer / Scene / Camera 初始化
 // Initialize Renderer / Scene / Camera
@@ -89,6 +93,26 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
     baseNode.add(rightArrow);
 });
 
+// 建立全局左右箭頭按鈕（固定在場景中，不跟隨畫作旋轉）
+// Create global left and right arrow buttons (fixed in scene, don't rotate with artworks)
+const { left: leftArrow, right: rightArrow } = createArrowButton();
+// 儲存 rootNode 引用到箭頭的 userData，供點擊事件使用
+// Store rootNode reference in arrow userData for click event handling
+leftArrow.userData = { galleryRootNode: rootNode };
+rightArrow.userData = { galleryRootNode: rootNode };
+leftArrow.visible = false; // 初始隱藏，由 updateArtworkInfoFromRotation 控制
+rightArrow.visible = false; // 初始隱藏，由 updateArtworkInfoFromRotation 控制
+// 箭頭固定在相機視角的左右兩側，懸浮於地面
+// Arrows fixed on left and right sides of camera view, floating above ground
+leftArrow.position.set(ARTWORK_WIDTH, -0.9, ARTWORK_Z);
+rightArrow.position.set(-ARTWORK_WIDTH, -0.9, ARTWORK_Z);
+// 箭頭躺平並反向（繞 X 軸旋轉 -90 度，繞 Z 軸旋轉 180 度）
+// Arrows lying flat and reversed direction
+leftArrow.rotation.z = Math.PI;
+rightArrow.rotation.z = Math.PI;
+scene.add(leftArrow);
+scene.add(rightArrow);
+
 
 const spotlight = createSpotlight();
 spotlight.position.set(0, 5, 0);
@@ -124,6 +148,7 @@ renderer.setAnimationLoop(animate);
 
 function animate(time) {
     updateTween(time);
+    updateArtworkFocus();
     renderer.render(scene, camera);
 }
 
@@ -150,13 +175,19 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    mirror.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
+    const { width, height } = getMirrorRenderTargetSize();
+    mirror.getRenderTarget().setSize(width, height);
+    mirror.material.uniforms.resolution.value.set(width, height);
 });
 
 // 點擊事件監聽：建立 raycaster 並處理點擊行為
 // Click event listener: create raycaster and handle click behavior.
 window.addEventListener('click', (event) => {
-    const intersections = createClickIntersections(event, camera, rootNode);
+    if (!isGalleryInteractive) return;
+
+    // 檢測場景中所有物件（包含箭頭和畫作）
+    // Detect all objects in scene (including arrows and artworks)
+    const intersections = createClickIntersections(event, camera, scene);
     runClickArrowAction(
         intersections,
         artworkCount,
