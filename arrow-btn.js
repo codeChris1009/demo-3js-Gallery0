@@ -63,6 +63,10 @@ function createArrowMesh(textureMap, name) {
         // 允許貼圖透明度生效
         // Enable texture transparency
         transparent: true,
+        // 添加自發光效果（光暈），初始較黯淡
+        // Add emissive glow effect, initially dim
+        emissive: 0xffffff,
+        emissiveIntensity: 0.05,
     });
     const mesh = new THREE.Mesh(ARROW_BUTTON_BOXGEOMETRY, material);
     mesh.name = name;

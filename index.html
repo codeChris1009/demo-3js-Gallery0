@@ -20,9 +20,32 @@
     <div id="custom-cursor">
       <div class="cursor-ring"></div>
     </div>
+
+    <div id="intro-overlay" aria-live="polite">
+      <div id="intro-stage">
+        <div id="intro-card-ring" aria-hidden="true">
+          <div class="intro-card"></div>
+          <div class="intro-card"></div>
+          <div class="intro-card"></div>
+          <div class="intro-card"></div>
+          <div class="intro-card"></div>
+          <div class="intro-card"></div>
+        </div>
+        <div id="intro-frame-glow"></div>
+        <div id="intro-frame">
+          <p id="intro-prep-label">PREPARING</p>
+          <div id="intro-countdown">3</div>
+          <div id="intro-ready" hidden>READY</div>
+          <p id="intro-enter-prompt" hidden>CLICK TO ENTER</p>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="main.js"></script>
 
     <h1 id="title"></h1>
-    <h2 id="artist"></h2>
+    <div id="artist-wrapper">
+      <h2 id="artist"></h2>
+    </div>
   </body>
 </html>

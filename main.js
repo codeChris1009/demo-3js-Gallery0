@@ -8,7 +8,7 @@ import {
 import { getArtworkTextureByIndex } from './texture.js';
 import { createImageBorderMesh } from './img-border.js';
 import { createSpotlight } from './spotlight.js';
-import { createMirror } from './reflector-mirror.js';
+import { createMirror, getMirrorRenderTargetSize } from './reflector-mirror.js';
 import {
     createArrowButton,
     ARROW_LEFT_NAME,
@@ -28,6 +28,9 @@ const ARTWORK_WIDTH = 3;
 const ARTWORK_HEIGHT = 2;
 const ARTWORK_DEPTH = 0.1;
 const ARTWORK_Z = -4;
+const ARTWORK_FOCUS_Z_OFFSET = 0.55;
+const ARTWORK_SIDE_SCALE = 0.6;
+const ARTWORK_FOCUS_SCALE = 1.12;
 
 // Renderer / Scene / Camera 初始化
 // Initialize Renderer / Scene / Camera
@@ -45,6 +48,7 @@ scene.add(rootNode);
 // 追蹤當前面向相機的作品 displayIndex
 // Track the current front-facing artwork displayIndex
 let currentFrontDisplayIndex = 0;
+let isGalleryInteractive = false;
 
 // 建立作品：先打散順序，再平均分布在圓周上
 // Build artworks: shuffle order, then distribute evenly around the circle
@@ -77,18 +81,29 @@ randomArtworkIndices.forEach((artworkIndex, displayIndex) => {
     artworkMesh.userData = artworkData;
     baseNode.add(artworkMesh);
 
-    // 建立左右箭頭按鈕
-    // Create left and right arrow buttons
-    const { left: leftArrow, right: rightArrow } = createArrowButton();
-    leftArrow.userData = displayIndex;
-    rightArrow.userData = displayIndex;
-    // 注意：leftArrow 在畫面右邊（x = +3），rightArrow 在畫面左邊（x = -3）
-    // Note: leftArrow is on the right side of screen (x = +3), rightArrow is on the left side (x = -3)
-    leftArrow.position.set(ARTWORK_WIDTH, 0, ARTWORK_Z);
-    rightArrow.position.set(-ARTWORK_WIDTH, 0, ARTWORK_Z);
-    baseNode.add(leftArrow);
-    baseNode.add(rightArrow);
+    baseNode.userData.borderMesh = border;
+    baseNode.userData.artworkMesh = artworkMesh;
 });
+
+// 建立全局左右箭頭按鈕（固定在場景中，不跟隨畫作旋轉）
+// Create global left and right arrow buttons (fixed in scene, don't rotate with artworks)
+const { left: leftArrow, right: rightArrow } = createArrowButton();
+// 儲存 rootNode 引用到箭頭的 userData，供點擊事件使用
+// Store rootNode reference in arrow userData for click event handling
+leftArrow.userData = { galleryRootNode: rootNode };
+rightArrow.userData = { galleryRootNode: rootNode };
+leftArrow.visible = false; // 初始隱藏，由 updateArtworkInfoFromRotation 控制
+rightArrow.visible = false; // 初始隱藏，由 updateArtworkInfoFromRotation 控制
+// 箭頭固定在相機視角的左右兩側，懸浮於地面
+// Arrows fixed on left and right sides of camera view, floating above ground
+leftArrow.position.set(ARTWORK_WIDTH, -0.9, ARTWORK_Z);
+rightArrow.position.set(-ARTWORK_WIDTH, -0.9, ARTWORK_Z);
+// 箭頭躺平並反向（繞 X 軸旋轉 -90 度，繞 Z 軸旋轉 180 度）
+// Arrows lying flat and reversed direction
+leftArrow.rotation.z = Math.PI;
+rightArrow.rotation.z = Math.PI;
+scene.add(leftArrow);
+scene.add(rightArrow);
 
 
 const spotlight = createSpotlight();
@@ -111,24 +126,23 @@ renderer.render(scene, camera);
 // 初始化時顯示正面作品的標題與藝術家
 // Display the front-facing artwork's title and artist on initialization
 updateArtworkInfoFromRotation();
-// 延遲一點淡入，讓頁面載入更流暢
-// Delay fade-in slightly for smoother page load.
-setTimeout(() => {
+
+// 初始化自定義光標
+// Initialize custom cursor
+initCustomCursor().then(() => {
+    isGalleryInteractive = true;
     const titleElement = document.getElementById('title');
     const artistElement = document.getElementById('artist');
     if (titleElement) titleElement.style.opacity = '1';
     if (artistElement) artistElement.style.opacity = '1';
-}, 100);
-
-// 初始化自定義光標
-// Initialize custom cursor
-initCustomCursor();
+});
 
 renderer.setAnimationLoop(animate);
 
 
 function animate(time) {
     updateTween(time);
+    updateArtworkFocus();
     renderer.render(scene, camera);
 }
 
@@ -155,13 +169,19 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    mirror.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
+    const { width, height } = getMirrorRenderTargetSize();
+    mirror.getRenderTarget().setSize(width, height);
+    mirror.material.uniforms.resolution.value.set(width, height);
 });
 
 // 點擊事件監聽：建立 raycaster 並處理點擊行為
 // Click event listener: create raycaster and handle click behavior.
 window.addEventListener('click', (event) => {
-    const intersections = createClickIntersections(event, camera, rootNode);
+    if (!isGalleryInteractive) return;
+
+    // 檢測場景中所有物件（包含箭頭和畫作）
+    // Detect all objects in scene (including arrows and artworks)
+    const intersections = createClickIntersections(event, camera, scene);
     runClickArrowAction(
         intersections,
         artworkCount,
@@ -169,6 +189,45 @@ window.addEventListener('click', (event) => {
         ARROW_LEFT_NAME,
         ARROW_RIGHT_NAME,
         updateArtworkInfoFromRotation);
+});
+
+// 追蹤當前懸浮的箭頭
+// Track currently hovered arrow
+let currentHoveredArrow = null;
+
+// 鼠標懸浮效果：箭頭變亮
+// Mouse hover effect: arrows brighten
+window.addEventListener('mousemove', (event) => {
+    if (!isGalleryInteractive) return;
+
+    const intersections = createClickIntersections(event, camera, scene);
+
+    // 尋找被懸浮的箭頭
+    // Find hovered arrow
+    const arrowIntersection = intersections.find((intersection) => {
+        const name = intersection?.object?.name;
+        return name === ARROW_LEFT_NAME || name === ARROW_RIGHT_NAME;
+    });
+
+    const hoveredArrow = arrowIntersection ? arrowIntersection.object : null;
+
+    // 如果懸浮的箭頭改變了
+    // If hovered arrow changed
+    if (hoveredArrow !== currentHoveredArrow) {
+        // 恢復之前懸浮的箭頭亮度
+        // Restore previous hovered arrow brightness
+        if (currentHoveredArrow && currentHoveredArrow.material) {
+            currentHoveredArrow.material.emissiveIntensity = 0.05;
+        }
+
+        // 增亮新懸浮的箭頭
+        // Brighten newly hovered arrow
+        if (hoveredArrow && hoveredArrow.material) {
+            hoveredArrow.material.emissiveIntensity = 0.4;
+        }
+
+        currentHoveredArrow = hoveredArrow;
+    }
 });
 
 /**
@@ -193,6 +252,15 @@ function updateArtworkInfoFromRotation() {
         }
     });
 
+    // 更新全局箭頭可見性：只在有正面畫作時顯示
+    // Update global arrow visibility: only show when there is a front-facing artwork
+    if (frontFacingNode) {
+        const leftArrowObj = scene.children.find(child => child.name === ARROW_LEFT_NAME);
+        const rightArrowObj = scene.children.find(child => child.name === ARROW_RIGHT_NAME);
+        if (leftArrowObj) leftArrowObj.visible = true;
+        if (rightArrowObj) rightArrowObj.visible = true;
+    }
+
     if (frontFacingNode && frontFacingNode.userData) {
         const { displayIndex, id, title, artist } = frontFacingNode.userData;
         currentFrontDisplayIndex = displayIndex;
@@ -203,4 +271,32 @@ function updateArtworkInfoFromRotation() {
         if (titleElement) titleElement.textContent = title || '';
         if (artistElement) artistElement.textContent = artist || '';
     }
+}
+
+/**
+ * 根據作品面向相機的程度，動態調整前後位置與縮放，
+ * 讓正中央的作品更突出。
+ * Emphasize the centered artwork by pushing it forward and scaling it up.
+ */
+function updateArtworkFocus() {
+    rootNode.children.forEach((child) => {
+        const borderMesh = child.userData?.borderMesh;
+        const artworkMesh = child.userData?.artworkMesh;
+
+        if (!borderMesh || !artworkMesh) return;
+
+        const totalRotation = rootNode.rotation.y + child.rotation.y;
+        const normalizedRotation = ((totalRotation % COMPLETE_CIRCLE_RADIANS) + COMPLETE_CIRCLE_RADIANS) % COMPLETE_CIRCLE_RADIANS;
+        const adjustedRotation = normalizedRotation > Math.PI ? normalizedRotation - COMPLETE_CIRCLE_RADIANS : normalizedRotation;
+
+        const facingStrength = Math.max(0, Math.cos(adjustedRotation));
+        const focusStrength = facingStrength * facingStrength;
+        const focusedZ = ARTWORK_Z + ARTWORK_FOCUS_Z_OFFSET * focusStrength;
+        const focusedScale = ARTWORK_SIDE_SCALE + (ARTWORK_FOCUS_SCALE - ARTWORK_SIDE_SCALE) * focusStrength;
+
+        borderMesh.position.z = focusedZ;
+        artworkMesh.position.z = focusedZ;
+        borderMesh.scale.setScalar(focusedScale);
+        artworkMesh.scale.set(focusedScale, focusedScale, focusedScale);
+    });
 }
