@@ -21,7 +21,6 @@ import {
 } from './click-fn.js';
 import { initCustomCursor } from './cursor.js';
 
-
 // 畫作平面尺寸與位置設定
 // Artwork dimensions and position settings
 const ARTWORK_WIDTH = 3;
@@ -144,6 +143,7 @@ function animate(time) {
     updateTween(time);
     updateArtworkFocus();
     renderer.render(scene, camera);
+
 }
 
 /**
@@ -162,8 +162,11 @@ function prewarmArtworkViews() {
     rootNode.rotation.y = initialRotationY;
 }
 
-// 視窗大小調整：更新相機寬高比與渲染器尺寸
-// Window resize: update camera aspect ratio and renderer size
+
+// Handle window resize Keep the aspect ratio and update the renderer size
+// This ensures that the scene looks correct when the window size changes
+// 處理視窗大小調整，保持寬高比並更新渲染器尺寸
+// 這確保視窗大小改變時場景看起來正確
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
