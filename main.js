@@ -19,6 +19,7 @@ import {
     runClickArrowAction,
     updateTween
 } from './click-fn.js';
+import { initCustomCursor } from './cursor.js';
 
 
 // 畫作平面尺寸與位置設定
@@ -118,6 +119,10 @@ setTimeout(() => {
     if (titleElement) titleElement.style.opacity = '1';
     if (artistElement) artistElement.style.opacity = '1';
 }, 100);
+
+// 初始化自定義光標
+// Initialize custom cursor
+initCustomCursor();
 
 renderer.setAnimationLoop(animate);
 
