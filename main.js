@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {
+    COMPLETE_CIRCLE_RADIANS,
     getArtworkCount,
     getBaseNodeRotation,
     getRandomUniqueIndices
@@ -8,7 +9,15 @@ import { getArtworkTextureByIndex } from './texture.js';
 import { createImageBorderMesh } from './img-border.js';
 import { createSpotlight } from './spotlight.js';
 import { createMirror } from './reflector-mirror.js';
-import { createArrowButton } from './arrow-btn.js';
+import {
+    createArrowButton,
+    ARROW_LEFT_NAME,
+    ARROW_RIGHT_NAME
+} from './arrow-btn.js';
+import {
+    createClickIntersections,
+    runClickArrowAction
+} from './click-fn.js';
 
 
 // 畫作平面尺寸與位置設定
@@ -93,4 +102,16 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     mirror.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
+});
+
+// 點擊事件監聽：建立 raycaster 並處理點擊行為
+// Click event listener: create raycaster and handle click behavior.
+window.addEventListener('click', (event) => {
+    const intersections = createClickIntersections(event, camera, rootNode);
+    runClickArrowAction(
+        intersections,
+        artworkCount,
+        COMPLETE_CIRCLE_RADIANS,
+        ARROW_LEFT_NAME,
+        ARROW_RIGHT_NAME);
 });

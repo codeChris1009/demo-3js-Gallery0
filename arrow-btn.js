@@ -66,4 +66,8 @@ function createArrowMesh(textureMap, name) {
     return mesh;
 }
 
-export { createArrowButton };
+export {
+    createArrowButton,
+    ARROW_LEFT_NAME,
+    ARROW_RIGHT_NAME
+};

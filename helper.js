@@ -44,6 +44,7 @@ function getRandomUniqueIndices(count) {
 }
 
 export {
+    COMPLETE_CIRCLE_RADIANS,
     getArtworkCount,
     getBaseNodeRotation,
     getRandomUniqueIndices,
