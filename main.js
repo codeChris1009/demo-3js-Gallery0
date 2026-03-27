@@ -16,7 +16,8 @@ import {
 } from './arrow-btn.js';
 import {
     createClickIntersections,
-    runClickArrowAction
+    runClickArrowAction,
+    updateTween
 } from './click-fn.js';
 
 
@@ -28,8 +29,8 @@ const ARTWORK_Z = -4;
 
 // Renderer / Scene / Camera 初始化
 const renderer = new THREE.WebGLRenderer();
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -87,9 +88,33 @@ mirror.position.y = -1.1;
 mirror.rotateX(-Math.PI / 2);
 scene.add(mirror);
 
+// 暖機：先編譯材質與 shader，減少首次互動卡頓
+// Warm up shader/material pipeline to reduce initial interaction stutter.
+renderer.compile(scene, camera);
+prewarmArtworkViews();
+renderer.render(scene, camera);
+renderer.setAnimationLoop(animate);
 
-function animate() {
+
+function animate(time) {
+    updateTween(time);
     renderer.render(scene, camera);
+}
+
+/**
+ * 預先渲染各個作品角度，讓貼圖在首次互動前先上傳到 GPU。
+ * Pre-render each artwork view so textures are uploaded before first interaction.
+ */
+function prewarmArtworkViews() {
+    const initialRotationY = rootNode.rotation.y;
+    const step = COMPLETE_CIRCLE_RADIANS / Math.max(1, artworkCount);
+
+    for (let i = 0; i < artworkCount; i++) {
+        rootNode.rotation.y = initialRotationY + step * i;
+        renderer.render(scene, camera);
+    }
+
+    rootNode.rotation.y = initialRotationY;
 }
 
 // 處理視窗大小調整，保持寬高比並更新渲染器尺寸

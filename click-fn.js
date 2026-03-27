@@ -1,9 +1,19 @@
 import * as THREE from 'three';
+import { Group, Tween, Easing } from '@tweenjs/tween.js';
 
 // 旋轉方向常數：左鍵為正向、右鍵為反向
 // Rotation direction constants: left is positive, right is negative.
 const TO_LEFT = 1;
 const TO_RIGHT = -1;
+const tweenGroup = new Group();
+const ENABLE_CLICK_DEBUG_LOG = false;
+
+// 旋轉動畫持續時間（毫秒）/ Rotation animation duration in milliseconds.
+const ROTATE_DURATION_MS = 720;
+
+// 防止同一個 rootNode 同時被多個 tween 更新造成抖動
+// Prevent jitter caused by multiple concurrent twines on the same rootNode.
+const activeRotationTweenByRoot = new WeakMap();
 
 /**
  * 建立 raycaster 並回傳點擊命中的物件清單
@@ -45,24 +55,29 @@ function runClickArrowAction(
     leftArrowName,
     rightArrowName) {
     if (intersections.length === 0) {
-        console.log('Intersections: []');
+        if (ENABLE_CLICK_DEBUG_LOG) console.log('Intersections: []');
         return;
     }
 
-    console.log('Intersections:', intersections);
-    const firstIntersection = intersections[0];
-    if (!firstIntersection || !firstIntersection.object) return;
+    if (ENABLE_CLICK_DEBUG_LOG) console.log('Intersections:', intersections);
+    // 不只看第一筆命中，改為找「箭頭」命中，避免被其他 mesh 擋到排序
+    // Do not rely on only the first hit. Find the arrow hit in intersections.
+    const arrowIntersection = intersections.find((intersection) => {
+        const name = intersection?.object?.name;
+        return name === leftArrowName || name === rightArrowName;
+    });
+    if (!arrowIntersection || !arrowIntersection.object) return;
 
-    const clickedObject = firstIntersection.object;
+    const clickedObject = arrowIntersection.object;
     const galleryRootNode = clickedObject.parent?.parent || null;
 
     if (clickedObject.name === leftArrowName) {
-        console.log(`${leftArrowName} clicked`);
+        if (ENABLE_CLICK_DEBUG_LOG) console.log(`${leftArrowName} clicked`);
         rotateGallery(galleryRootNode,
             TO_LEFT,
             artworkCount, completeCircleRadians);
     } else if (clickedObject.name === rightArrowName) {
-        console.log(`${rightArrowName} clicked`);
+        if (ENABLE_CLICK_DEBUG_LOG) console.log(`${rightArrowName} clicked`);
         rotateGallery(galleryRootNode,
             TO_RIGHT,
             artworkCount, completeCircleRadians);
@@ -70,19 +85,63 @@ function runClickArrowAction(
 }
 
 // Private helper function
-// 私有輔助函式：依方向旋轉作品環
+
+/**
+ * 執行畫廊旋轉動畫。
+ * Execute gallery rotation animation.
+ *
+ * @param {THREE.Object3D} rootNode - 旋轉的根節點 / The root node to rotate
+ * @param {number} direction - 旋轉方向，左正右負 / Rotation direction, left positive, right negative
+ * @param {number} artworkCount - 作品總數 / Total artwork count
+ * @param {number} completeCircleRadians - 一整圈弧度 / Full-circle radians
+ * @returns {void}
+ */
 function rotateGallery(
     rootNode,
     direction,
     artworkCount,
     completeCircleRadians) {
-    if (!rootNode || artworkCount <= 0) return;
 
-    rootNode.rotateY(direction * (completeCircleRadians / artworkCount));
+    if (!rootNode || artworkCount <= 0) return;
+    const deltaY = direction * (completeCircleRadians / artworkCount);
+    const tweenState = { y: rootNode.rotation.y };
+    const previousRotationTween = activeRotationTweenByRoot.get(rootNode);
+    if (previousRotationTween) previousRotationTween.stop();
+
+    // 使用 Tween.js 進行平滑旋轉動畫
+    const rotationTween = new Tween(tweenState, tweenGroup)
+        .to({ y: rootNode.rotation.y + deltaY }, ROTATE_DURATION_MS)
+        // 前段較快、尾段平滑收斂
+        // Faster at start, smooth settle at the end.
+        .easing(Easing.Cubic.Out)
+        .onUpdate(() => {
+            rootNode.rotation.y = tweenState.y;
+        })
+        .onComplete(() => {
+            activeRotationTweenByRoot.delete(rootNode);
+        })
+        .onStop(() => {
+            activeRotationTweenByRoot.delete(rootNode);
+        })
+        .start();
+    activeRotationTweenByRoot.set(rootNode, rotationTween);
+    // rootNode.rotateY(direction * (completeCircleRadians / artworkCount));
+}
+
+/**
+ * 更新所有啟用中的 tween 動畫。
+ * Update all active tween animations.
+ *
+ * @param {number} [time]
+ * @returns {void}
+ */
+function updateTween(time) {
+    tweenGroup.update(time);
 }
 
 
 export {
+    updateTween,
     createClickIntersections,
     runClickArrowAction
 };
