@@ -20,8 +20,9 @@ const textureLoader = new THREE.TextureLoader();
 
 // 左右按鈕貼圖
 // Left and right arrow textures.
-const ARROW_LEFT = textureLoader.load('/left.png');
-const ARROW_RIGHT = textureLoader.load('/right.png');
+const base = import.meta.env.BASE_URL;
+const ARROW_LEFT = textureLoader.load(base + 'left.png');
+const ARROW_RIGHT = textureLoader.load(base + 'right.png');
 
 // 共用按鈕幾何，減少重複建立成本
 // Reuse one geometry to reduce allocation cost
