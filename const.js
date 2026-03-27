@@ -1,11 +1,20 @@
-import * as THREE from 'three';
-import { Reflector } from 'three/addons/objects/Reflector.js';
-import * as TWEEN from 'tween';
+/**
+ * @typedef {Object} Artwork
+ * @property {number} id
+ * @property {string} image
+ * @property {string} title
+ * @property {string} artist
+ * @property {number} StartYear
+ * @property {number} EndYear
+ * @property {string} description
+ * @property {string} url
+ */
 
+/** @type {Artwork[]} */
 const artworks = [
     {
         id: 1,
-        imagename: 'Forest-Landscape-in-the-Moonlight.png',
+        image: 'Forest-Landscape-in-the-Moonlight.png',
         title: 'Forest Landscape in the Moonlight',
         artist: 'Georg Eduard Otto Saal',
         StartYear: 1861,
@@ -15,7 +24,7 @@ const artworks = [
     },
     {
         id: 2,
-        imagename: 'Seascape-from-the-Zeeland-Waters-near-he-Island-of-Schouwen.png',
+        image: 'Seascape-from-the-Zeeland-Waters-near-the-Island-of-Schouwen.png',
         title: 'Seascape from the Zeeland Waters near the Island of Schouwen',
         artist: 'Petrus Johannes Schotel',
         StartYear: 1825,
@@ -25,7 +34,7 @@ const artworks = [
     },
     {
         id: 3,
-        imagename: 'Shepherdess-with-a-Flock-of-Sheep.png',
+        image: 'Shepherdess-with-a-Flock-of-Sheep.png',
         title: 'Shepherdess with a Flock of Sheep',
         artist: 'Anton Mauve',
         StartYear: 1870,
@@ -35,17 +44,7 @@ const artworks = [
     },
     {
         id: 4,
-        imagename: 'Shipwreck-off-a-Rocky-Coast.png',
-        title: 'Shipwreck off a Rocky Coast',
-        artist: 'Wijnand Nuijen',
-        StartYear: 1837,
-        EndYear: 1837,
-        description: 'This painting is a highlight of Dutch Romanticism. It represents the insignificance of man in the face of nature. During a storm, a three-master has struck a rock and foundered. The crew desperately combs the beach in search of survivors. Rays of sun pierce through the gloomy sky and afford a view of the overwhelming sheer cliffs, which make the people seem even smaller.',
-        url: 'https://www.rijksmuseum.nl/en/collection/object/Shipwreck-off-a-Rocky-Coast--21992e5eb6e8c9c3d219ad939f284c55',
-    },
-    {
-        id: 5,
-        imagename: 'The-Holy-Family-at-Night.png',
+        image: 'The-Holy-Family-at-Night.png',
         title: 'The Holy Family at Night',
         artist: 'workshop of Rembrandt van Rijn',
         StartYear: 1642,
@@ -54,18 +53,8 @@ const artworks = [
         url: 'https://www.rijksmuseum.nl/en/collection/object/The-Holy-Family-at-Night--5d713140afa6974e6923caa545ae8eb8',
     },
     {
-        id: 6,
-        imagename: 'The-Singel-Bridge-at-the-Paleisstraat-in-Amsterdam.png',
-        title: 'The Singel Bridge at the Paleisstraat in Amsterdam',
-        artist: 'George Hendrik Breitner',
-        StartYear: 1896,
-        EndYear: 1898,
-        description: 'Breitner often took photographs to prepare his paintings, and several such studies are known for this work. The way in which the woman walks straight towards us and the image is cropped strikes one as distinctly photographic. Breitner initially depicted the woman as a maid, but after a negative review, the gallery representing him felt it would be better if he made her into an elegant lady.',
-        url: 'https://www.rijksmuseum.nl/en/collection/object/The-Singel-Bridge-at-the-Paleisstraat-in-Amsterdam--596ea47fa3632feadb1469236bc9838f',
-    },
-    {
-        id: 7,
-        imagename: 'Venus-and-Adonis.png',
+        id: 5,
+        image: 'Venus-and-Adonis.png',
         title: 'Venus and Adonis',
         artist: 'Ferdinand Bol',
         StartYear: 1658,
@@ -74,8 +63,8 @@ const artworks = [
         url: 'https://www.rijksmuseum.nl/en/collection/object/Venus-and-Adonis--0c276f3257f5c9fe73db1bb820005aa8',
     },
     {
-        id: 8,
-        imagename: 'Young-Italian-Woman-with-Puck-the-Dog.png',
+        id: 6,
+        image: 'Young-Italian-Woman-with-Puck-the-Dog.png',
         title: 'Young Italian Woman with Puck the Dog',
         artist: 'Thérèse Schwartze',
         StartYear: 1885,
@@ -84,3 +73,5 @@ const artworks = [
         url: 'https://www.rijksmuseum.nl/en/collection/object/Young-Italian-Woman-with-Puck-the-Dog--861c5e902527fe73ede8706c30a89738',
     },
 ];
+
+export { artworks };

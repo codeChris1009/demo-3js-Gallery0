@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  text-align: center;
+  width: 100%;
+  font-weight: 100;
+  transition: opacity 0.5s ease-in-out;
+}
+
+#title {
+  color: #dedede;
+  font-family: "Cormorant", serif;
+  position: fixed;
+  font-size: 6em;
+  top: 0.5em;
+}
+
+#artist {
+  color: #b3b3b3;
+  font-family: "Stalemate", serif;
+  position: fixed;
+  font-size: 3em;
+  top: 4em;
+}
