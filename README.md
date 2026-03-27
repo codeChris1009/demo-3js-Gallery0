@@ -1,5 +1,8 @@
 # Three.js 3D 虛擬藝廊實作：核心技術與開發紀實
 
+### 展示網誌 Github Page
+GALERY [https://codechris1009.github.io/demo-3js-Gallery0/]
+
 ## 程式架構與檔案說明
 
 本專案主要檔案功能如下：
